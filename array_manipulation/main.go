@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"sort"
 	"strconv"
 	"strings"
 )
@@ -24,27 +23,35 @@ func arrayManipulation(n int32, queries [][]int32) int64 {
 	if len(queries) < 1 || n < 1 {
 		return 0
 	}
-	var arr []int
-	for i := 0; i < int(n); i++ {
+	var arr []int64
+	maxV := int64(0)
+	x := int64(0)
+	for i := int32(0); i < n+1; i++ {
 		arr = append(arr, 0)
 	}
 	for _, query := range queries {
 		a := query[0]
 		b := query[1]
 		k := query[2]
-		for i := a - 1; i < b; i++ {
-			arr[i] += int(k)
+		arr[a] += int64(k)
+		if b+1 <= n {
+			arr[b+1] -= int64(k)
 		}
 	}
-	sort.Ints(arr)
-	return int64(arr[len(arr)-1])
+	for i := int32(1); i <= n; i++ {
+		x = x + arr[i]
+		if maxV < x {
+			maxV = x
+		}
+	}
+	return maxV
 }
 
 func main() {
 	reader := bufio.NewReaderSize(os.Stdin, 16*1024*1024)
 
-	stdout, err := os.Create(os.Getenv("OUTPUT_PATH"))
-	checkError(err)
+	stdout, _ := os.Create(os.Getenv("OUTPUT_PATH"))
+	//checkError(err)
 
 	defer stdout.Close()
 
