@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"net"
+	"os"
 )
 
 const (
@@ -10,14 +12,29 @@ const (
 )
 
 func main() {
-	l, err := net.Dial("tcp", ADDR)
+	conn, err := net.Dial("tcp", ADDR)
 	if err != nil {
-		fmt.Println("Error 1: ", err.Error())
+		fmt.Println("Error Connection: ", err.Error())
 		return
 	}
-	defer l.Close()
 
-	msg := "Hello Ayoub\n"
+	defer conn.Close()
 
-	fmt.Fprintf(l, msg)
+	reader := bufio.NewReader(os.Stdin)
+
+	for {
+		text, err := reader.ReadString('\n')
+		if err != nil {
+			fmt.Println("Error: ", err.Error())
+			break
+		}
+		if text == "stop\n" {
+			break
+		}
+		_, err = conn.Write([]byte(text))
+		if err != nil {
+			fmt.Println("Error Writing: ", err.Error())
+			break
+		}
+	}
 }

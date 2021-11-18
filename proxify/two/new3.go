@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"runtime"
 	"strconv"
@@ -26,13 +27,14 @@ func readFile(m, n int, bytesChannel chan []byte, errChannel chan error) {
 	if err != nil {
 		errChannel <- err
 	} else {
-		b := make([]byte, 1024)
-		_, er := f.Read(b)
+		b, er := ioutil.ReadFile(filename)
 		if er != nil {
 			errChannel <- er
 			close(bytesChannel)
 		} else {
-			bytesChannel <- b
+			for i := 0; i+m < len(b); i += m {
+				bytesChannel <- b[i : i+n]
+			}
 			errChannel <- nil
 		}
 	}

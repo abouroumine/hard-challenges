@@ -22,21 +22,19 @@ import (
 
 func writeToFile(bytesChannel chan []byte, doneChannel chan bool, errChannel chan error) {
 	errChannel <- nil
-	var content string
+	f, err := os.Create(filename)
+	if err != nil {
+		errChannel <- err
+		return
+	}
 	for {
 		select {
 		case <-doneChannel:
-			err := os.WriteFile(filename, []byte(content), 0)
-			if err != nil {
-				errChannel <- err
-			} else {
-				errChannel <- nil
-			}
 			close(bytesChannel)
 			return
 		case next := <-bytesChannel:
-			content += string(next) + "\n"
-			errChannel <- nil
+			_, err = f.Write(next)
+			errChannel <- err
 		}
 	}
 
